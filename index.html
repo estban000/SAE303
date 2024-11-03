@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte de l'Académie de Versailles</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- Partie CSS-->
+    <link rel="stylesheet" href="mapStyle.css" />
+
+</head>
+<body>
+    <!-- xxxxxxxxxxxxxxx Google Maps version Temu xxxxxxxxxxxxxxxxxx-->
+    <div id="map"></div>
+    <!-- xxxxxxxxxxxxxxx Fin Google Maps version Temu xxxxxxxxxxxxxxxxxx-->
+
+    <!-- xxxxxxxxxxxxxxx Information a propos de la Map xxxxxxxxxxxxxxxxxx-->
+    <div id="informationDonnee">Survolez un département pour voir les informations</div>
+    <!-- xxxxxxxxxxxxxxx Fin Information a propos de la Map xxxxxxxxxxxxxxxxxx-->
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+    <script>
+        // Initialisation de la carte centrée sur la région de l'Académie de Versailles
+        const map = L.map('map').setView([48.8, 2.1], 9);
+
+        // Couche de tuiles OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Sélection de la zone d'information
+        const infoBox = document.getElementById('info-box');
+
+        // Style pour mettre en évidence les départements de l'Académie de Versailles
+        function highlightAcademy(feature) {
+            const departementAcademie = ["Yvelines", "Essonne", "Hauts-de-Seine", "Val-d'Oise"];
+            
+            // Vérification du nom du département
+            if (departementAcademie.includes(feature.properties.nom)) {
+                return {
+                    color: "black",      // Couleur des frontières
+                    weight: 2,
+                    fillColor: "blue",   // Couleur de remplissage
+                    fillOpacity: 0.2
+                };
+            } else {
+                return {
+                    color: "gray",
+                    weight: 1,
+                    fillColor: "#E0E0E0", // Couleur de remplissage pour les autres départements
+                    fillOpacity: 0.1
+                };
+            }
+        }
+
+        // Fonction pour changer le style au survol et afficher les informations dans informationDonnee
+        function highlightFeature(e) {
+            const layer = e.target;
+            layer.setStyle({
+                weight: 3,
+                fillColor: 'yellow',
+                fillOpacity: 0.2
+            });
+
+            // Afficher les informations du département dans la zone informationDonnee
+            const deptName = layer.feature.properties.nom;
+            informationDonnee.innerHTML = `<b>Département :</b> ${deptName}`;
+        }
+
+        // Fonction pour rétablir le style initial et vider informationDonnee
+        function resetHighlight(e) {
+            geojson.resetStyle(e.target);
+            informationDonnee.innerHTML = "Survolez un département pour voir les informations";
+        }
+
+        // Fonction pour zoomer sur le département lors d'un clic
+        function zoomToFeature(e) {
+            map.fitBounds(e.target.getBounds());
+        }
+
+        // Fonction pour attacher les événements de survol
+        function onEachFeature(feature, layer) {
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: zoomToFeature
+            });
+        }
+
+        // Chargement du fichier GeoJSON contenant tous les départements
+        const geojsonUrl = "https://france-geojson.gregoiredavid.fr/repo/regions/ile-de-france/departements-ile-de-france.geojson";
+
+        // Ajout du GeoJSON sur la carte avec le style conditionnel et événements
+        const geojson = new L.GeoJSON.AJAX(geojsonUrl, {
+            style: highlightAcademy,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+    </script>
+</body>
+</html>
