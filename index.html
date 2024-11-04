@@ -15,9 +15,9 @@
     <div id="map"></div>
     <!-- xxxxxxxxxxxxxxx Fin Google Maps version Temu xxxxxxxxxxxxxxxxxx-->
 
-    <!-- xxxxxxxxxxxxxxx Information a propos de la Map xxxxxxxxxxxxxxxxxx-->
+    <!-- xxxxxxxxxxxxxxx Information de la mini-legende de la map xxxxxxxxxxxxxxxxxx-->
     <div id="informationDonnee">Survolez un département pour voir les informations</div>
-    <!-- xxxxxxxxxxxxxxx Fin Information a propos de la Map xxxxxxxxxxxxxxxxxx-->
+    <!-- xxxxxxxxxxxxxxx Fin Information de la mini-legende de la map xxxxxxxxxxxxxxxxxx-->
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
@@ -31,7 +31,7 @@
         }).addTo(map);
 
         // Sélection de la zone d'information
-        const infoBox = document.getElementById('info-box');
+        const infoBox = document.getElementById('informationDonnee');
 
         // Style pour mettre en évidence les départements de l'Académie de Versailles
         function highlightAcademy(feature) {
@@ -40,10 +40,10 @@
             // Vérification du nom du département
             if (departementAcademie.includes(feature.properties.nom)) {
                 return {
-                    color: "black",      // Couleur des frontières
+                    color: "black",      // Couleur des frontières département
                     weight: 2,
                     fillColor: "blue",   // Couleur de remplissage
-                    fillOpacity: 0.2
+                    fillOpacity: 0.1
                 };
             } else {
                 return {
@@ -90,10 +90,10 @@
         }
 
         // Chargement du fichier GeoJSON contenant tous les départements
-        const geojsonUrl = "https://france-geojson.gregoiredavid.fr/repo/regions/ile-de-france/departements-ile-de-france.geojson";
+        const url = "https://france-geojson.gregoiredavid.fr/repo/regions/ile-de-france/departements-ile-de-france.geojson";
 
         // Ajout du GeoJSON sur la carte avec le style conditionnel et événements
-        const geojson = new L.GeoJSON.AJAX(geojsonUrl, {
+        const geojson = new L.GeoJSON.AJAX(url, {
             style: highlightAcademy,
             onEachFeature: onEachFeature
         }).addTo(map);
