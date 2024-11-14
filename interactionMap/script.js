@@ -12,7 +12,64 @@ const infoBox = document.getElementById('informationDonnee');
 // Variable pour stocker le département sélectionné
 let selectedLayer = null;
 
-// Style pour mettre en évidence les départements de l'Académie de Versailles
+// Structure pour stocker le nombre d'établissements publics et privés par département
+const departmentStats = {};
+
+// Fonction pour mettre à jour les statistiques par département
+function updateDepartmentStats(etablissement) {
+    const deptName = etablissement.departement; // Assurez-vous que chaque établissement a un champ 'departement'
+
+    // Initialisation des statistiques pour le département si elles n'existent pas
+    if (!departmentStats[deptName]) {
+        departmentStats[deptName] = { public: 0, prive: 0 };
+    }
+
+    // Incrémentation du nombre d'établissements public/privé
+    if (etablissement.secteur_public_prive_libe === 'Public') {
+        departmentStats[deptName].public += 1;
+    } else if (etablissement.secteur_public_prive_libe === 'Privé') {
+        departmentStats[deptName].prive += 1;
+    }
+}
+
+// Chargement des données des établissements
+fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
+    .then(response => response.json())
+    .then(data => {
+        // Mise à jour des statistiques par département
+        data.forEach(etablissement => {
+            updateDepartmentStats(etablissement);
+        });
+
+        // Crée des marqueurs pour chaque établissement
+        data.forEach(etablissement => {
+            const { latitude, longitude, appellation_officielle, secteur_public_prive_libe, effectif_total, departement } = etablissement;
+
+            // Crée un marqueur pour chaque établissement
+            const marker = L.marker([latitude, longitude]).addTo(map);
+            
+            // Ajoute un événement de survol pour afficher les informations
+            marker.on('mouseover', function () {
+                infoBox.innerHTML = `
+                    <b>${appellation_officielle}</b><br>
+                    Type : ${secteur_public_prive_libe}<br>
+                    Effectif Total : ${effectif_total}
+                `;
+            });
+
+            // Ajoute un événement de clic pour afficher plus d'informations
+            marker.on('click', function () {
+                infoBox.innerHTML = `
+                    <b>${appellation_officielle}</b><br>
+                    Type : ${secteur_public_prive_libe}<br>
+                    Effectif Total : ${effectif_total}
+                `;
+            });
+        });
+    })
+    .catch(error => console.error("Erreur de chargement des données : ", error));
+
+// Fonction pour mettre en évidence les départements de l'Académie de Versailles
 function highlightAcademy(feature) {
     const departementAcademie = ["Yvelines", "Essonne", "Hauts-de-Seine", "Val-d'Oise"];
     
@@ -36,18 +93,17 @@ function highlightAcademy(feature) {
 // Fonction pour changer le style au survol et afficher les informations dans le infoBox
 function highlightFeature(e) {
     const layer = e.target;
-    if (layer !== selectedLayer) {  // S'assurer que le département sélectionné ne soit pas surligné
-        layer.setStyle({
-            weight: 3,
-            color: '#666',
-            fillColor: 'yellow',
-            fillOpacity: 0.1
-        });
-    }
+    const deptName = layer.feature.properties.nom;
+
+    // Récupère les statistiques des établissements publics et privés pour le département
+    const stats = departmentStats[deptName] || { public: 0, prive: 0 };
 
     // Afficher les informations du département dans la zone infoBox
-    const deptName = layer.feature.properties.nom;
-    infoBox.innerHTML = `<b>Département :</b> ${deptName}`;
+    infoBox.innerHTML = `
+        <b>Département :</b> ${deptName}<br>
+        <b>Établissements publics :</b> ${stats.public}<br>
+        <b>Établissements privés :</b> ${stats.prive}
+    `;
 }
 
 // Fonction pour rétablir le style initial et vider le infoBox
@@ -84,7 +140,7 @@ function zoomToFeature(e) {
 
     // Mettre à jour l'infoBox avec le nom du département sélectionné
     const deptName = layer.feature.properties.nom;
-    infoBox.innerHTML = `<b>Département sélectionné :</b> ${deptName}`;
+    infoBox.innerHTML = `<b>Département :</b> ${deptName}`;
 }
 
 // Fonction pour attacher les événements de survol, de clic et de popup à chaque département
