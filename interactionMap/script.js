@@ -12,13 +12,14 @@ const infoBox = document.getElementById('informationDonnee');
 // Variable pour stocker le département sélectionné
 let selectedLayer = null;
 
-// Structure pour stocker le nombre d'établissements publics et privés sous contrat par département
+// Structure pour stocker les données des établissements par département
 const departmentStats = {};
+let establishmentMarkers = [];
 
 // Fonction pour mettre à jour les statistiques par département
 function updateDepartmentStats(etablissement) {
     const deptName = etablissement.libelle_departement; // Assurez-vous que chaque établissement a un champ 'libelle_departement'
-    const secteur = etablissement.secteur_public_prive_libe; // "Public" ou "Privé"
+    const secteur = etablissement.secteur_public_prive_libe; // "Public" ou "Privé sous contrat"
 
     // Vérifier que les valeurs sont correctes
     console.log('Département:', deptName, 'Secteur:', secteur);
@@ -34,27 +35,23 @@ function updateDepartmentStats(etablissement) {
     } else if (secteur === 'PRIVE SOUS CONTRAT') {
         departmentStats[deptName].prive += 1;
     }
-
-    // Afficher l'état actuel des statistiques (pour débogage)
-    console.log(departmentStats);
 }
 
-// Chargement des données des établissements
-fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
-    .then(response => response.json())
-    .then(data => {
-        // Mise à jour des statistiques par département
-        data.forEach(etablissement => {
-            updateDepartmentStats(etablissement);
-        });
+// Fonction pour afficher les marqueurs d'un département
+function showMarkersForDepartment(departmentName) {
+    // Effacer les marqueurs précédemment ajoutés
+    establishmentMarkers.forEach(marker => marker.remove());
+    establishmentMarkers = []; // Réinitialiser le tableau des marqueurs
 
-        // Crée des marqueurs pour chaque établissement
-        data.forEach(etablissement => {
-            const { latitude, longitude, appellation_officielle, secteur_public_prive_libe, effectif_total, libelle_departement } = etablissement;
-
+    // Ajouter les marqueurs pour le département sélectionné
+    data.forEach(etablissement => {
+        if (etablissement.libelle_departement === departmentName) {
+            const { latitude, longitude, appellation_officielle, secteur_public_prive_libe, effectif_total } = etablissement;
+            
             // Crée un marqueur pour chaque établissement
             const marker = L.marker([latitude, longitude]).addTo(map);
-            
+            establishmentMarkers.push(marker); // Ajouter le marqueur au tableau
+
             // Ajoute un événement de survol pour afficher les informations
             marker.on('mouseover', function () {
                 infoBox.innerHTML = `
@@ -72,6 +69,17 @@ fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
                     Effectif Total : ${effectif_total}
                 `;
             });
+        }
+    });
+}
+
+// Chargement des données des établissements
+fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
+    .then(response => response.json())
+    .then(data => {
+        // Mise à jour des statistiques par département
+        data.forEach(etablissement => {
+            updateDepartmentStats(etablissement);
         });
     })
     .catch(error => console.error("Erreur de chargement des données : ", error));
@@ -147,11 +155,10 @@ function zoomToFeature(e) {
 
     // Mettre à jour l'infoBox avec le nom du département sélectionné
     const deptName = layer.feature.properties.nom;
-    infoBox.innerHTML = `
-    <b>Département :</b> ${deptName}<br>
-    <b>Établissements publics :</b> ${stats.public}<br>
-    <b>Établissements privés :</b> ${stats.prive}
-`   ;
+    infoBox.innerHTML = `<b>Département :</b> ${deptName}`;
+
+    // Afficher les marqueurs des établissements pour le département cliqué
+    showMarkersForDepartment(deptName);
 }
 
 // Fonction pour attacher les événements de survol, de clic et de popup à chaque département
