@@ -12,24 +12,31 @@ const infoBox = document.getElementById('informationDonnee');
 // Variable pour stocker le département sélectionné
 let selectedLayer = null;
 
-// Structure pour stocker le nombre d'établissements publics et privés par département
+// Structure pour stocker le nombre d'établissements publics et privés sous contrat par département
 const departmentStats = {};
 
 // Fonction pour mettre à jour les statistiques par département
 function updateDepartmentStats(etablissement) {
-    const deptName = etablissement.departement; // Assurez-vous que chaque établissement a un champ 'departement'
+    const deptName = etablissement.libelle_departement; // Assurez-vous que chaque établissement a un champ 'libelle_departement'
+    const secteur = etablissement.secteur_public_prive_libe; // "Public" ou "Privé"
+
+    // Vérifier que les valeurs sont correctes
+    console.log('Département:', deptName, 'Secteur:', secteur);
 
     // Initialisation des statistiques pour le département si elles n'existent pas
     if (!departmentStats[deptName]) {
         departmentStats[deptName] = { public: 0, prive: 0 };
     }
 
-    // Incrémentation du nombre d'établissements public/privé
-    if (etablissement.secteur_public_prive_libe === 'Public') {
+    // Incrémentation du nombre d'établissements public/privé sous contrat
+    if (secteur === 'PUBLIC') {
         departmentStats[deptName].public += 1;
-    } else if (etablissement.secteur_public_prive_libe === 'Privé') {
+    } else if (secteur === 'PRIVE SOUS CONTRAT') {
         departmentStats[deptName].prive += 1;
     }
+
+    // Afficher l'état actuel des statistiques (pour débogage)
+    console.log(departmentStats);
 }
 
 // Chargement des données des établissements
@@ -43,7 +50,7 @@ fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
 
         // Crée des marqueurs pour chaque établissement
         data.forEach(etablissement => {
-            const { latitude, longitude, appellation_officielle, secteur_public_prive_libe, effectif_total, departement } = etablissement;
+            const { latitude, longitude, appellation_officielle, secteur_public_prive_libe, effectif_total, libelle_departement } = etablissement;
 
             // Crée un marqueur pour chaque établissement
             const marker = L.marker([latitude, longitude]).addTo(map);
@@ -140,7 +147,11 @@ function zoomToFeature(e) {
 
     // Mettre à jour l'infoBox avec le nom du département sélectionné
     const deptName = layer.feature.properties.nom;
-    infoBox.innerHTML = `<b>Département :</b> ${deptName}`;
+    infoBox.innerHTML = `
+    <b>Département :</b> ${deptName}<br>
+    <b>Établissements publics :</b> ${stats.public}<br>
+    <b>Établissements privés :</b> ${stats.prive}
+`   ;
 }
 
 // Fonction pour attacher les événements de survol, de clic et de popup à chaque département
