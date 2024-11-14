@@ -1,0 +1,62 @@
+.footer {
+    
+    margin-top: 145px;
+    margin-bottom: 123.45px;
+    font-size: 1.25rem;
+    text-align: center;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color : #707070;
+}
+
+.logo
+{
+    /*margin-top: 45.71px;*/
+    width: 201px;
+    /*height: 67px;*/
+    /*position: relative;*/
+    /*left: 25%;*/
+    /*transform: translate(-50%, -50%);*/
+    /*background-color: purple;*/
+    /*flex : 1;*/
+    /*justify-content: flex-start;*/
+}
+
+.vl {
+    border: 1px solid;
+    height: 80px;
+    margin-left: 10px;
+    color: #707070;
+}
+
+.foottext 
+{
+    padding: 8px; ;
+}
+
+.footlien, .footlien:visited {
+    color: #0066FF;
+}
+
+.foottop, .foottop:visited
+{
+    color : #707070;
+}
+
+.cr
+{
+    margin-top: 20px;
+}
+
+.milieu {
+    /*background-color: black;*/
+    align-items: center;
+    margin: 50px;
+    display : flex;
+    justify-content: center;
+}
+
+/*div.foottext {
+    background-color: yellow;
+    /*margin : 10px;*/
+    /*flex: 1;*/
+
