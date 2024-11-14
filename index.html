@@ -15,9 +15,9 @@
     <div id="map"></div>
     <!-- xxxxxxxxxxxxxxx Fin Google Maps version Temu xxxxxxxxxxxxxxxxxx-->
 
-    <!-- xxxxxxxxxxxxxxx Information de la mini-legende de la map xxxxxxxxxxxxxxxxxx-->
+    <!-- xxxxxxxxxxxxxxx Information a propos de la Map xxxxxxxxxxxxxxxxxx-->
     <div id="informationDonnee">Survolez un département pour voir les informations</div>
-    <!-- xxxxxxxxxxxxxxx Fin Information de la mini-legende de la map xxxxxxxxxxxxxxxxxx-->
+    <!-- xxxxxxxxxxxxxxx Fin Information a propos de la Map xxxxxxxxxxxxxxxxxx-->
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
@@ -31,7 +31,7 @@
         }).addTo(map);
 
         // Sélection de la zone d'information
-        const infoBox = document.getElementById('informationDonnee');
+        const infoBox = document.getElementById('info-box');
 
         // Style pour mettre en évidence les départements de l'Académie de Versailles
         function highlightAcademy(feature) {
@@ -40,10 +40,10 @@
             // Vérification du nom du département
             if (departementAcademie.includes(feature.properties.nom)) {
                 return {
-                    color: "black",      // Couleur des frontières département
+                    color: "black",      // Couleur des frontières
                     weight: 2,
                     fillColor: "blue",   // Couleur de remplissage
-                    fillOpacity: 0.1
+                    fillOpacity: 0.2
                 };
             } else {
                 return {
@@ -75,9 +75,22 @@
             informationDonnee.innerHTML = "Survolez un département pour voir les informations";
         }
 
-        // Fonction pour zoomer sur le département lors d'un clic
+        // Fonction pour zoomer sur le département lors d'un clic et supprimer la surbrillance et la couleur de remplissage
         function zoomToFeature(e) {
-            map.fitBounds(e.target.getBounds());
+            const layer = e.target;
+
+            // Zoomer sur le département
+            map.fitBounds(layer.getBounds());
+            // Modifier le style du département pour enlever la couleur de remplissage
+            layer.setStyle({
+                color: "black",
+                weight: 2,
+                fillColor: "none",  // Enlève la couleur de remplissage
+                fillOpacity: 0      // Rendre le remplissage complètement transparent
+            });
+            // Mettre à jour avec le nom du département sélectionné
+            const deptName = layer.feature.properties.nom;
+            informationDonnee.innerHTML = `<b>Département sélectionné :</b> ${deptName}`;
         }
 
         // Fonction pour attacher les événements de survol
@@ -90,10 +103,10 @@
         }
 
         // Chargement du fichier GeoJSON contenant tous les départements
-        const url = "https://france-geojson.gregoiredavid.fr/repo/regions/ile-de-france/departements-ile-de-france.geojson";
+        const geojsonUrl = "https://france-geojson.gregoiredavid.fr/repo/regions/ile-de-france/departements-ile-de-france.geojson";
 
         // Ajout du GeoJSON sur la carte avec le style conditionnel et événements
-        const geojson = new L.GeoJSON.AJAX(url, {
+        const geojson = new L.GeoJSON.AJAX(geojsonUrl, {
             style: highlightAcademy,
             onEachFeature: onEachFeature
         }).addTo(map);
