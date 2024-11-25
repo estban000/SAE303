@@ -6,36 +6,37 @@
     <title>Carte de l'Académie de Versailles</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="css/mapStyle.css">
+    <link rel="stylesheet" href="css/BarreRecherche.css">
     <link rel="stylesheet" href="css/footer.css">
 </head>
 <body>
     <div id="map"></div>
     <div id="informationDonnee">Survolez un département pour voir les informations</div>
 
+    <!-- Barre de recherche -->
+    <h1>Recherche d'Établissements</h1>
+    <input type="text" id="search-bar" placeholder="Rechercher un établissement..." />
+    <div id="result-container"></div>
+
+    <!-- Script de la carte -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
     <script src="interactionMap/script.js"></script>
 
+    <!-- Script de la barre de recherche -->
+    <script src="BarreRecherche/BR.js"></script>
+
     <footer>
         <div class="milieu">
-
-                <img class="logo" src="image\Cy.png" alt=""/>
-                
-                <div class="vl"></div>
-
+            <img class="logo" src="image\Cy.png" alt=""/>
+            <div class="vl"></div>
             <div class="foottext">
-                <p class="foottext">Les donnée de cette carte sont de la SAE 303</p>
-                
-                    <a class="footlien" href="https://fr-fr.facebook.com/CYCergyParisUniversite/">Facebook</a>
-                
-                    <a class="footlien" href="https://twitter.com/universitecergy?lang=fr">Twitter</a>
-                
-                    <a class="footlien" href="https://www.cyu.fr/">Université CY Paris Université</a>
-
-                    <a class="foottop">|</a>
-
-                    <a class="foottop" href="#top">Remonter</a>
-
+                <p class="foottext">Marcell BANOL MORENO - Betincia Massenat - Priscilla Kiamboté - Shaun QUADRAO </p>
+                <a class="footlien" href="https://fr-fr.facebook.com/CYCergyParisUniversite/">Facebook</a>
+                <a class="footlien" href="https://twitter.com/universitecergy?lang=fr">Twitter</a>
+                <a class="footlien" href="https://www.cyu.fr/">Université CY Paris Université</a>
+                <a class="foottop">|</a>
+                <a class="foottop" href="#top">Remonter</a>
                 <p class="cr">&#169; 2013-2024 - BUT MMI - CY Paris Université</p>
             </div>
         </div>
