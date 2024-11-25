@@ -13,10 +13,21 @@
     <div id="map"></div>
     <div id="informationDonnee">Survolez un département pour voir les informations</div>
 
-    <!-- Barre de recherche -->
-    <h1>Recherche d'Établissements</h1>
-    <input type="text" id="search-bar" placeholder="Rechercher un établissement..." />
-    <div id="result-container"></div>
+<!-- Barre de recherche -->
+<h1>Recherche d'Établissements</h1>
+
+<!-- Sélecteur de département -->
+<label for="department-filter">Choisir un département :</label>
+<select id="department-filter">
+    <option value="">Tous les départements</option>
+    <!-- Les départements seront ajoutés dynamiquement ici -->
+</select>
+
+<!-- Barre de recherche -->
+<input type="text" id="search-bar" placeholder="Rechercher un établissement..." />
+
+<!-- Conteneur pour les résultats -->
+<div id="result-container"></div>
 
     <!-- Script de la carte -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
