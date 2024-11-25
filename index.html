@@ -14,20 +14,24 @@
     <div id="informationDonnee">Survolez un département pour voir les informations</div>
 
 <!-- Barre de recherche -->
-<h1>Recherche d'Établissements</h1>
+<h1>Recherche Avancé</h1>
 
-<!-- Sélecteur de département -->
-<label for="department-filter">Choisir un département :</label>
-<select id="department-filter">
-    <option value="">Tous les départements</option>
-    <!-- Les départements seront ajoutés dynamiquement ici -->
-</select>
+<div id="search-container">
+    <!-- Sélecteur de département -->
+    <label for="department-filter">Choisir un département :</label>
+    <select id="department-filter">
+        <option value="">Tous les départements</option>
+        <!-- Les départements seront ajoutés dynamiquement -->
+    </select>
 
-<!-- Barre de recherche -->
-<input type="text" id="search-bar" placeholder="Rechercher un établissement..." />
+    <!-- Barre de recherche -->
+    <input type="text" id="search-bar" placeholder="Rechercher un établissement..." />
+</div>
 
-<!-- Conteneur pour les résultats -->
-<div id="result-container"></div>
+<!-- Résultats -->
+<div id="result-container">
+    <!-- Les résultats seront injectés ici dynamiquement -->
+</div>
 
     <!-- Script de la carte -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
