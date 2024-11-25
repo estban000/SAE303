@@ -11,6 +11,7 @@ const infoBox = document.getElementById('informationDonnee');
 
 // Variable pour stocker les marqueurs et éviter d'ajouter plusieurs fois
 let establishmentMarkers = [];
+let selectedDepartment = null; // Variable pour garder trace du département sélectionné
 
 // Structure pour stocker le nombre d'établissements publics et privés par département
 const departmentStats = {};
@@ -32,10 +33,12 @@ function updateDepartmentStats(etablissement) {
 
 // Chargement des données des établissements
 fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
         // Mise à jour des statistiques par département
-        data.forEach(etablissement => {
+        data.forEach(function(etablissement) {
             updateDepartmentStats(etablissement);
         });
 
@@ -62,40 +65,44 @@ fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
         // Fonction pour afficher les marqueurs pour un département
         function showMarkersForDepartment(departmentName) {
             // Effacer les marqueurs précédemment ajoutés
-            establishmentMarkers.forEach(marker => marker.remove());
+            establishmentMarkers.forEach(function(marker) {
+                marker.remove();
+            });
             establishmentMarkers = []; // Réinitialiser le tableau des marqueurs
 
             // Ajouter les marqueurs pour le département sélectionné
-            data.forEach(etablissement => {
+            data.forEach(function(etablissement) {
                 if (etablissement.libelle_departement === departmentName) {
-                    const { latitude, longitude, appellation_officielle, secteur, effectif_total } = etablissement;
-                    
-                    // Crée un marqueur pour chaque établissement
-                    const marker = L.marker([latitude, longitude]).addTo(map);
-                    establishmentMarkers.push(marker); // Ajouter le marqueur au tableau
+                    const { latitude, longitude, appellation_officielle, secteur, effectif_total, effectif_total_garcons, effectif_total_filles, date_ouverture } = etablissement;
 
-                    // Ajoute un événement de survol pour afficher les informations
-                    marker.on('mouseover', function () {
-                        infoBox.innerHTML = `
-                            <b>${appellation_officielle}</b><br>
-                            Type : ${secteur}<br>
-                            Effectif Total : ${effectif_total}
-                        `;
-                    });
+                    // Définir des icônes colorées pour public et privé
+                    const markerIcon = L.circleMarker([latitude, longitude], {
+                        radius: 4,
+                        fillColor: secteur === "PUBLIC" ? "blue" : "orange",
+                        color: "#000",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    }).addTo(map);
 
-                    // Ajoute un événement de clic pour afficher plus d'informations
-                    marker.on('click', function () {
-                        infoBox.innerHTML = `
-                            <b>${appellation_officielle}</b><br>
-                            Type : ${secteur}<br>
-                            Effectif Total : ${effectif_total}
-                        `;
+                    establishmentMarkers.push(markerIcon); // Ajouter le marqueur au tableau
+
+                    // Ajoute un événement de clic pour afficher les informations dans un pop-up
+                    markerIcon.on('click', function() {
+                        markerIcon.bindPopup(`
+                            <b>${appellation_officielle}</b><br><br>
+                            <b>Date d'Ouverture :</b> ${date_ouverture || "Non spécifiée"}<br>
+                            <b>Type :</b> ${secteur}<br>
+                            <b>Effectif Total :</b> ${effectif_total}<br>
+                            <b>Effectifs Garçons :</b> ${effectif_total_garcons || "Non spécifié"}<br>
+                            <b>Effectifs Filles :</b> ${effectif_total_filles || "Non spécifié"}<br>
+                        `).openPopup();
                     });
                 }
             });
         }
 
-        // Fonction pour changer le style au survol et afficher les informations dans le infoBox
+        // Fonction pour mettre en évidence les départements au survol et afficher les informations dans l'infoBox
         function highlightFeature(e) {
             const layer = e.target;
             const deptName = layer.feature.properties.nom;
@@ -104,27 +111,57 @@ fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
             // Afficher les informations du département dans la zone infoBox
             infoBox.innerHTML = `
                 <b>Département :</b> ${deptName}<br>
-                <b>Établissements publics :</b> ${stats.public}<br>
-                <b>Établissements privés :</b> ${stats.prive}
+                <b>Établissements publics :</b> ${stats.public} 
+                <span style="background-color: blue; color: white; padding: 2px 5px; border-radius: 3px;">PUBLIC</span><br><br>
+                <b>Établissements privés :</b> ${stats.prive} 
+                <span style="background-color: orange; color: white; padding: 2px 5px; border-radius: 3px;">PRIVÉ</span>
             `;
         }
 
-        // Fonction pour rétablir le style initial et vider le infoBox
+        // Fonction pour rétablir la surbrillance et réinitialiser l'infoBox lors du survol de départements
         function resetHighlight(e) {
             const layer = e.target;
+
+            // Si un département est déjà sélectionné, ne pas réinitialiser son style
+            if (selectedDepartment && selectedDepartment === layer) return;
+
             geojson.resetStyle(layer);
             infoBox.innerHTML = "Survolez un département pour voir les informations";
         }
 
-        // Fonction pour zoomer sur le département lors d'un clic
+        // Fonction pour zoomer sur le département lors d'un clic et garder l'infoBox active
         function zoomToFeature(e) {
             const layer = e.target;
+
+            // Si un département est déjà sélectionné, réinitialiser son style
+            if (selectedDepartment) {
+                geojson.resetStyle(selectedDepartment);
+            }
 
             // Zoomer sur le département
             map.fitBounds(layer.getBounds());
 
-            // Récupère le nom du département
+            // Mettre à jour la variable selectedDepartment
+            selectedDepartment = layer;
+
+            // Modifier le style du département sélectionné pour enlever la couleur de remplissage
+            selectedDepartment.setStyle({
+                color: "black",
+                weight: 2,
+                fillColor: "none",  // Enlève la couleur de remplissage
+                fillOpacity: 0      // Rendre le remplissage complètement transparent
+            });
+
+            // Afficher les informations du département sélectionné dans la zone infoBox
             const deptName = layer.feature.properties.nom;
+            const stats = departmentStats[deptName] || { public: 0, prive: 0 };
+            infoBox.innerHTML = `
+                <b>Département :</b> ${deptName}<br>
+                <b>Établissements publics :</b> ${stats.public} 
+                <span style="background-color: blue; color: white; padding: 2px 5px; border-radius: 3px;">PUBLIC</span><br><br>
+                <b>Établissements privés :</b> ${stats.prive} 
+                <span style="background-color: orange; color: white; padding: 2px 5px; border-radius: 3px;">PRIVÉ</span>
+            `;
 
             // Afficher les marqueurs pour le département sélectionné
             showMarkersForDepartment(deptName);
@@ -149,4 +186,6 @@ fetch('effectifs-en-terminale-specialites-academie-versailles-2022(1).json')
         }).addTo(map);
 
     })
-    .catch(error => console.error("Erreur de chargement des données : ", error));
+    .catch(function(error) {
+        console.error("Erreur de chargement des données : ", error);
+    });
